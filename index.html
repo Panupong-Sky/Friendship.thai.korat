@@ -1,26 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Friendship Thai Korat - Google Sheet</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Friendship Thai Korat – Google Sheet</title>
   <style>
-    html,body{height:100%;margin:0}
-    iframe{width:100%;height:100%;border:0}
+    :root { --gap: 12px; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    header {
+      position: sticky; top: 0; z-index: 2;
+      display: flex; align-items: center; gap: var(--gap);
+      padding: 10px var(--gap);
+      background: #111; color: #fff;
+    }
+    header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+    header .btn {
+      margin-left: auto; padding: 6px 10px; border: 0; border-radius: 8px;
+      cursor: pointer; background: #fff; color: #111; font-weight: 600;
+    }
+    .wrap { height: calc(100% - 48px); }
+    iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .loading {
+      position: fixed; inset: 48px 0 0 0; display: grid; place-items: center;
+      background: #0b0b0b; color: #fff; font-weight: 600; letter-spacing: .3px;
+    }
+    .hide { display: none !important; }
+    footer {
+      position: fixed; right: 8px; bottom: 8px; background: rgba(17,17,17,.85);
+      color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 12px;
+    }
+    a.link { color: #4ea3ff; text-decoration: none; }
   </style>
 </head>
 <body>
-  <iframe id="sheet"
-    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSR935z0s5yvvLYlWOlmkYXxfDKg2zmv01bVVB3wXeArkQD-XVdvpboEmUR53-W8OtyIhLc_HS81bpd/pubhtml?widget=true&amp;headers=false">
-  </iframe>
+  <header>
+    <h1>Friendship Thai Korat – Google Sheet</h1>
+    <button class="btn" id="manualRefresh">รีเฟรชตอนนี้</button>
+  </header>
+
+  <div class="wrap">
+    <iframe
+      id="gsheet"
+      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSR935z0s5yvvLYlWOlmkYXxfDKg2zmv01bVVB3wXeArkQD-XVdvpboEmUR53-W8OtyIhLc_HS81bpd/pubhtml?widget=true&headers=false"
+      title="Google Sheet"
+      referrerpolicy="no-referrer">
+    </iframe>
+  </div>
+
+  <div id="loading" class="loading">กำลังโหลดข้อมูลจาก Google Sheets…</div>
+
+  <footer>
+    ถ้า iframe ไม่แสดง ลองเปิดตรงนี้:
+    <a class="link" target="_blank"
+      href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSR935z0s5yvvLYlWOlmkYXxfDKg2zmv01bVVB3wXeArkQD-XVdvpboEmUR53-W8OtyIhLc_HS81bpd/pubhtml?widget=true&headers=false">
+      เปิดชีต
+    </a>
+  </footer>
 
   <script>
-    // รีโหลดทุก 60 วินาที (ปรับได้)
-    setInterval(() => {
-      const f = document.getElementById('sheet');
-      // เพิ่มพารามิเตอร์กันแคช
-      const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSR935z0s5yvvLYlWOlmkYXxfDKg2zmv01bVVB3wXeArkQD-XVdvpboEmUR53-W8OtyIhLc_HS81bpd/pubhtml?widget=true&headers=false";
-      f.src = base + "&t=" + Date.now();
-    }, 60000);
+    // รีเฟรชอัตโนมัติทุก 120 วินาที พร้อมกันแคชด้วย query ?cb=timestamp
+    const iframe = document.getElementById('gsheet');
+    const loading = document.getElementById('loading');
+    const base = iframe.src.split('?')[0];
+    const baseQS = "widget=true&headers=false";
+
+    function reloadSheet() {
+      loading.classList.remove('hide');
+      iframe.src = base + "?" + baseQS + "&cb=" + Date.now();
+    }
+
+    // ครั้งแรก: ซ่อน loading เมื่อโหลดเสร็จ
+    iframe.addEventListener('load', () => {
+      loading.classList.add('hide');
+    });
+
+    // รีเฟรชอัตโนมัติทุก 120 วินาที
+    setInterval(reloadSheet, 120000);
+
+    // ปุ่มรีเฟรชด้วยมือ
+    document.getElementById('manualRefresh').addEventListener('click', reloadSheet);
   </script>
 </body>
 </html>
